@@ -1,4 +1,6 @@
 const Photo = require('../models/photo.model');
+const Voter = require('../models/voter.model');
+const requestIp = require('request-ip');
 
 /****** SUBMIT PHOTO ********/
 
@@ -55,18 +57,39 @@ exports.loadAll = async (req, res) => {
 
 /****** VOTE FOR PHOTO ********/
 
-exports.vote = async (req, res) => {
+/****** VOTE FOR PHOTO ********/
 
+exports.vote = async (req, res) => {
+  const ipAddress = requestIp.getClientIp(req);
+  const photoId = req.params.id;
+  
   try {
-    const photoToUpdate = await Photo.findOne({ _id: req.params.id });
-    if (!photoToUpdate) res.status(404).json({ message: 'Not found' });
-    else {
-      photoToUpdate.votes++;
-      photoToUpdate.save();
-      res.send({ message: 'OK' });
+    const photo = await Photo.findOne({ _id: photoId });
+    if (!photo) {
+      return res.status(404).json({ message: 'Not found' });
     }
+
+    let voter = await Voter.findOne({ user: ipAddress });
+    if (!voter) {
+      // If this is the first time this user is voting, create a new Voter document
+      voter = new Voter({ user: ipAddress, votes: [photoId] });
+    } else if (voter.votes.includes(photoId)) {
+      // If this user has already voted for this photo, return an error
+      return res.status(500).json({ message: 'Already voted for this photo' });
+    } else {
+      // Add the photo ID to this user's votes and save the updated Voter document
+      voter.votes.push(photoId);
+    }
+
+    // Increment the photo's votes and save it
+    photo.votes++;
+    await photo.save();
+
+    // Save the updated Voter document
+    await voter.save();
+
+    res.json(photo);
   } catch (err) {
     res.status(500).json(err);
   }
-
 };
