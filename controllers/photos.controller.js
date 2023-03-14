@@ -57,8 +57,6 @@ exports.loadAll = async (req, res) => {
 
 /****** VOTE FOR PHOTO ********/
 
-/****** VOTE FOR PHOTO ********/
-
 exports.vote = async (req, res) => {
   const ipAddress = requestIp.getClientIp(req);
   const photoId = req.params.id;
