@@ -6,7 +6,7 @@ const loadTestData = require('./testData');
 const connectToDB = () => {
 
   // connect to DB
-  mongoose.connect('mongodb://localhost:27017/photosDB', { useNewUrlParser: true, useUnifiedTopology: true });
+  mongoose.connect('mongodb://127.0.0.1:27017/photosDB', { useNewUrlParser: true, useUnifiedTopology: true });
   const db = mongoose.connection;
 
   // on success

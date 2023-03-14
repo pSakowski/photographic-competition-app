@@ -8,9 +8,13 @@ exports.add = async (req, res) => {
     const { title, author, email } = req.fields;
     const file = req.files.file;
 
-    if(title && author && email && file) { // if fields are not empty...
+    if (title && author && email && file) { // if fields are not empty...
 
       const fileName = file.path.split('/').slice(-1)[0]; // cut only filename from full path, e.g. C:/test/abc.jpg -> abc.jpg
+      const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
+      if (!allowedExtensions.exec(fileName)) {
+        throw new Error('Wrong input!');
+      }
       const newPhoto = new Photo({ title, author, email, src: fileName, votes: 0 });
       await newPhoto.save(); // ...save new photo in DB
       res.json(newPhoto);
@@ -19,7 +23,7 @@ exports.add = async (req, res) => {
       throw new Error('Wrong input!');
     }
 
-  } catch(err) {
+  } catch (err) {
     res.status(500).json(err);
   }
 
@@ -31,7 +35,7 @@ exports.loadAll = async (req, res) => {
 
   try {
     res.json(await Photo.find());
-  } catch(err) {
+  } catch (err) {
     res.status(500).json(err);
   }
 
@@ -43,13 +47,13 @@ exports.vote = async (req, res) => {
 
   try {
     const photoToUpdate = await Photo.findOne({ _id: req.params.id });
-    if(!photoToUpdate) res.status(404).json({ message: 'Not found' });
+    if (!photoToUpdate) res.status(404).json({ message: 'Not found' });
     else {
       photoToUpdate.votes++;
       photoToUpdate.save();
       res.send({ message: 'OK' });
     }
-  } catch(err) {
+  } catch (err) {
     res.status(500).json(err);
   }
 
