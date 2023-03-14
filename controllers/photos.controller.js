@@ -11,10 +11,16 @@ exports.add = async (req, res) => {
     if (title && author && email && file) { // if fields are not empty...
 
       const fileName = file.path.split('/').slice(-1)[0]; // cut only filename from full path, e.g. C:/test/abc.jpg -> abc.jpg
-      const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
-      if (!allowedExtensions.exec(fileName)) {
-        throw new Error('Wrong input!');
+      const extension = fileName.split('.').slice(-1)[0]; // get the extension of the file
+      
+      if (extension !== 'gif' && extension !== 'jpg' && extension !== 'png') { // check if the file extension is valid
+        throw new Error('Invalid file format!');
       }
+
+      if (title.length > 25 || author.length > 50) {
+        throw new Error('Title max length is 25, author max length is 50');
+      }
+      
       const newPhoto = new Photo({ title, author, email, src: fileName, votes: 0 });
       await newPhoto.save(); // ...save new photo in DB
       res.json(newPhoto);
