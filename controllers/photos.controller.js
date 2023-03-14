@@ -21,6 +21,12 @@ exports.add = async (req, res) => {
         throw new Error('Title max length is 25, author max length is 50');
       }
       
+      // check email format
+      const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+      if (!emailRegex.test(email)) {
+        throw new Error('Invalid email format!');
+      }
+      
       const newPhoto = new Photo({ title, author, email, src: fileName, votes: 0 });
       await newPhoto.save(); // ...save new photo in DB
       res.json(newPhoto);
